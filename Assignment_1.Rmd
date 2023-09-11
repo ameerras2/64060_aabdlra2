@@ -1,0 +1,64 @@
+---
+title: "Assignment_1"
+output: word_document
+date: "2023-09-11"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# https://www.kaggle.com/datasets/joebeachcapital/nba-player-statistics #
+# Import the dataset into R #
+dataset <- read.csv("~/Downloads/nba_data_processed.csv", header=FALSE)
+head(dataset)
+
+# Print out descriptive statistics for a selection of quantitative and categorical variables. #
+# Quantitative variables #
+quant_vars <- c("Tm", "Age")
+cat_vars <- c("POS", "PTS")
+
+# Frequency table for categorical variables #
+for (PTS in cat_vars) {
+  cat_freq <- table(dataset[[PTS]]) 
+  print(paste("Frequency table for", PTS))
+  print(cat_freq)
+}
+
+# Transform a variable #
+dataset$Age <- as.integer(dataset$Age)
+dataset$LogAge <- log(dataset$Age)
+
+
+# Histogram for 3P #
+dataset <- as.integer(dataset$3P)
+
+## Warning: NAs introduced by coercion
+hist(dataset$3P, main="3P", xlab="3P%")
+
+# Scatterplot for Team vs. Age #
+dataset$Tm <- as.numeric(dataset$Tm)
+dataset$Age <- as.numeric(dataset$Age)
+plot(dataset$Tm, dataset$Age, main="Scatterplot: Tm vs. Age", xlab="Tm", ylab="Age")
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
