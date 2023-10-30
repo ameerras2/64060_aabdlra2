@@ -1,0 +1,92 @@
+---
+title: "Assignment 4"
+output: word_document
+date: "2023-10-29"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+library(factoextra)
+pharmaceutical_0data<-read.csv("~/Downloads/Pharmaceuticals.csv")
+pharmaceutical_data<-na.omit(pharmaceutical_0data)
+
+```
+
+Using the numerical variables (1 to 9) to cluster the 21 firms.
+```{r}
+row.names(pharmaceutical_0data)<-pharmaceutical_0data[,1]
+Clustering_data<-pharmaceutical_0data[,3:11]
+```
+Scaling the data according to requirement
+```{r}
+set.seed(143)
+ScaledData<-scale(Clustering_data)
+
+```
+
+
+```{r}
+k_wss<-fviz_nbclust(ScaledData,kmeans,method="wss")
+k_silhouette<-fviz_nbclust(ScaledData,kmeans,method="silhouette")
+k_wss
+k_silhouette
+distance<-dist(ScaledData,metho='euclidean')
+fviz_dist(distance)
+```
+
+We will be choose silhouette k value of 5 because this will ensure that the sum of squares is low along with proper separation within the clusters.
+
+```{r}
+set.seed(143)
+kmeans_5<-kmeans(ScaledData,centers = 5, nstart = 10)
+kmeans_5
+plot_kmeans_5<-fviz_cluster(kmeans_5,data = ScaledData) + ggtitle("K=5")
+plot_kmeans_5
+
+Clustering_data_1<-Clustering_data%>%
+  mutate(Cluster_no=kmeans_5$cluster)%>%
+  group_by(Cluster_no)%>%summarise_all('mean')
+Clustering_data_1
+
+```
+Companies are grouped into following clusters:
+Cluster_1= ABT,AHM,AZN,BMY,LLY,NVS,SGP,WYE
+Cluster_2= BAY,CHTT,IVX
+Cluster_3=AVE,ELN,MRX,WPI
+Cluster_4=AGN,PHA
+Cluster_5=GSK,JNJ,MRK,PFE
+From the above clusters 
+1.Cluster_1 Companies with moderate returns on equity and investment
+2.Cluster_2 Companies with Poor returns on Assets(ROA), Return on Equity (ROE), Low market Capitalization, and weak Asset turnover which implies that these companies are Highly Risky
+3.Cluster_3 Companies Similar to those in cluster 2 but with slightly lower levels of risk
+4.Cluster_4 Companies with very high price to earnings (P/E) ratios but poor ROA and ROE, making them more risky than those in cluster 2
+5.Cluster_5 Companies with high market capitalization, ROE and ROA
+
+```{r}
+Clustering_data_2<- pharmaceutical_data[,12:14] %>% mutate(Clusters=kmeans_5$cluster)
+ggplot(Clustering_data_2, mapping = aes(factor(Clusters), fill =Median_Recommendation))+geom_bar(position='dodge')+labs(x ='Clusters')
+ggplot(Clustering_data_2, mapping = aes(factor(Clusters),fill = Location))+geom_bar(position = 'dodge')+labs(x ='Clusters')
+ggplot(Clustering_data_2, mapping = aes(factor(Clusters),fill = Exchange))+geom_bar(position = 'dodge')+labs(x ='Clusters')
+
+
+```
+
+By examining the data, a distinct pattern becomes apparent concerning the connection between the clusters and the 'Median Recommendation' variable. Cluster 2 predominantly indicates recommendations spanning from 'hold' to 'moderate buy,' while Cluster 3 tends to favor recommendations from 'moderate buy' to 'moderate sell.'Upon closer inspection of the geographical distribution, it becomes evident that a substantial percentage of pharmaceutical companies are headquartered in the United States, and there is no conspicuous spatial arrangement. Nevertheless, there is no apparent association between clusters and the stock exchange, aside from the observation that the majority of these companies are publicly listed on the New York Stock Exchange (NYSE).
+
+
+Naming clusters:
+
+
+**Cluster 1 = Investment Cluster.**
+
+**Cluster 2 = Tight Cluster.**
+
+**Cluster 3 = Low Profit Cluster.**
+
+**Cluster 4 = Risky Cluster.**
+
+**Cluster 5 = Large Purchase Cluster.**
